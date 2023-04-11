@@ -1,5 +1,7 @@
 ﻿using la_mia_pizzeria_static.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 
 namespace la_mia_pizzeria_static.Controllers
@@ -34,7 +36,32 @@ namespace la_mia_pizzeria_static.Controllers
             return View(pizze);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Create()
+        {
+            var pizza = new Pizza
+            {
+                Image = "https://picsum.photos/200/300"
+            };
+
+            return View(pizza);
+        }
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult Create(Pizza pizza)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(pizza);
+			}
+
+			using var ctx = new PizzaContext();
+            ctx.Pizze.Add(pizza);   
+            ctx.SaveChanges();  
+            return RedirectToAction("Index");   
+		}
+
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
